@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+
 interface Program {
   id: number;
   title: string;
@@ -7,6 +8,7 @@ interface Program {
   country: string;
   year: number;
 }
+
 const Programs = () => {
   const [programs, setPrograms] = useState<Program[]>([]);
   useEffect(() => {
