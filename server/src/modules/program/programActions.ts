@@ -26,16 +26,14 @@ const programs = [
 // Declare the action
 
 import type { RequestHandler } from "express";
+import programRepository from "./programRepository";
 
-const browse: RequestHandler = (req, res) => {
-  if (req.query.q != null) {
-    const filteredPrograms = programs.filter((program) =>
-      program.synopsis.includes(req.query.q as string),
-    );
-
-    res.json(filteredPrograms);
-  } else {
+const browse: RequestHandler = async (req, res, next) => {
+  try {
+    const programs = await programRepository.readAll();
     res.json(programs);
+  } catch (err) {
+    next(err);
   }
 };
 
@@ -51,6 +49,76 @@ const read: RequestHandler = (req, res) => {
   }
 };
 
-// Export it to import it somewhere else
+const edit: RequestHandler = async (req, res, next) => {
+  try {
+    // Update a specific program based on the provided ID
+    const program = {
+      id: Number(req.params.id),
+      title: req.body.name,
+      synopsis: req.body.synopsis,
+      poster: req.body.poster,
+      country: req.body.country,
+      year: req.body.year,
+      category_id: req.body.category_id,
+    };
 
-export default { browse, read };
+    const affectedRows = await programRepository.update(
+      Number(req.params.id),
+      program,
+    );
+
+    // If the category is not found, respond with HTTP 404 (Not Found)
+    // Otherwise, respond with the category in JSON format
+    if (!affectedRows) {
+      res.sendStatus(404);
+    } else {
+      res.sendStatus(204);
+    }
+  } catch (err) {
+    // Pass any errors to the error-handling middleware
+    next(err);
+  }
+};
+
+const add: RequestHandler = async (req, res, next) => {
+  try {
+    // Extract the program data from the request body
+    const newProgram = {
+      title: req.body.name,
+      synopsis: req.body.synopsis,
+      poster: req.body.poster,
+      country: req.body.country,
+      year: req.body.year,
+      category_id: req.body.category_id,
+    };
+
+    // Create the program
+    const insertId = await programRepository.create(newProgram);
+
+    // Respond with HTTP 201 (Created) and the ID of the newly inserted item
+    res.status(201).json({ insertId });
+  } catch (err) {
+    // Pass any errors to the error-handling middleware
+    next(err);
+  }
+};
+
+const destroy: RequestHandler = async (req, res, next): Promise<void> => {
+  try {
+    const id = Number(req.params.id);
+
+    if (Number.isNaN(id) || id <= 0) {
+      res.status(400).json({
+        error: "Invalid program ID",
+      });
+      return;
+    }
+
+    await programRepository.delete(id);
+    res.sendStatus(204);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export default { browse, read, edit, add, destroy };

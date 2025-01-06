@@ -7,7 +7,10 @@ import { RouterProvider, createBrowserRouter } from "react-router-dom";
 
 // Import the main app component
 import App from "./App";
-import Programs from "./pages/programs";
+import ProgramNew from "./pages/programNew";
+import ProgramDetail from "./pages/programsDetails";
+import ProgramEdit from "./pages/programsEdit";
+import ProgramIndex from "./pages/programsIndex";
 
 // Import additional components for new routes
 // Try creating these components in the "pages" folder
@@ -23,11 +26,25 @@ const router = createBrowserRouter([
   {
     path: "/", // The root path
     element: <App />, // Renders the App component for the home page
-  },
-  // Try adding a new route! For example, "/about" with an About component
-  {
-    path: "/programs",
-    element: <Programs />,
+    children: [
+      {
+        path: "/programs",
+        element: <ProgramIndex />,
+        loader: () => fetch(`${import.meta.env.VITE_API_URL}/api/programs`),
+      },
+      {
+        path: "/programs/new",
+        element: <ProgramNew />,
+      },
+      {
+        path: "/programs/:id",
+        element: <ProgramDetail />,
+      },
+      {
+        path: "/programs/:id/edit",
+        element: <ProgramEdit />,
+      },
+    ],
   },
 ]);
 
