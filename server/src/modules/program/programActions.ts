@@ -121,4 +121,38 @@ const destroy: RequestHandler = async (req, res, next): Promise<void> => {
   }
 };
 
-export default { browse, read, edit, add, destroy };
+const validate: RequestHandler = (req, res, next) => {
+  type ValidationError = {
+    field: string;
+    message: string;
+  };
+
+  const errors: ValidationError[] = [];
+
+  const { title } = req.body;
+
+  if (title == null) {
+    errors.push({ field: "title", message: "The field is required" });
+  } else if (title.length > 255) {
+    errors.push({
+      field: "title",
+      message: "Should contain less than 255 characters",
+    });
+  }
+
+  const { synopsis } = req.body;
+
+  if (synopsis == null) {
+    errors.push({
+      field: "synopsis",
+      message: "The describe field is required",
+    });
+  } else if (title.length > 255) {
+    errors.push({
+      field: "title",
+      message: "Should contain less than 255 characters",
+    });
+  }
+};
+
+export default { browse, read, edit, add, destroy, validate };
