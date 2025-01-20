@@ -53,7 +53,7 @@ class ProgramRepository {
   async create(program: Omit<Program, "id">) {
     // Execute the SQL INSERT query to add a new category to the "category" table
     const [result] = await databaseClient.query<Result>(
-      "insert into programs (name) values (?)",
+      "insert into programs (title) values (?)",
       [program.title],
     );
 
